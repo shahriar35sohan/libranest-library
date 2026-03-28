@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LibraNest — Your Community Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0d0f1a;
+      --parchment: #f0f2ff;
+      --cream: #f7f8ff;
+      --rust: #5b5ef4;
+      --rust-hover: #4749d4;
+      --gold: #f59e0b;
+      --sage: #10b981;
+      --slate: #64748b;
+      --mist: #e2e5f5;
+      --white: #ffffff;
+      --shadow: rgba(13,15,26,0.14);
+      --accent2: #ec4899;
+      --dark-card: #151829;
+      --dark-border: rgba(255,255,255,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* ── ANNOUNCEMENT TICKER ── */
+    .ticker-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 101;
+      height: 38px;
+      background: linear-gradient(90deg,
+        #0f0c29 0%, #302b63 18%, #ec4899 36%,
+        #f59e0b 52%, #10b981 68%, #5b5ef4 84%, #0f0c29 100%);
+      background-size: 300% 100%;
+      animation: tickerBg 8s linear infinite;
+      display: flex; align-items: center; overflow: hidden;
+      box-shadow: 0 2px 20px rgba(91,94,244,0.4);
+    }
+    .ticker-bar::before {
+      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.08) 100%);
+    }
+    .ticker-bar::after {
+      content: ''; position: absolute; top: -20px; left: -10%;
+      width: 55%; height: 80px; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.15) 0%, transparent 70%);
+      animation: auroraMove 5s ease-in-out infinite alternate;
+    }
+    @keyframes auroraMove {
+      from { left: -10%; opacity: 0.6; }
+      to   { left:  60%; opacity: 1;   }
+    }
+    @keyframes tickerBg {
+      0%   { background-position:   0% 50% }
+      100% { background-position: 300% 50% }
+    }
+    .ticker-label {
+      flex-shrink: 0; position: relative; z-index: 2;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      border-right: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 0.68rem; font-weight: 800;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      padding: 0 16px; height: 100%;
+      display: flex; align-items: center; gap: 7px;
+      white-space: nowrap;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+    }
+    .lbl-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px #fff, 0 0 12px #f59e0b;
+      animation: blinkDot 1.4s ease-in-out infinite;
+      flex-shrink: 0; display: inline-block;
+    }
+    @keyframes blinkDot {
+      0%,100% { opacity:1; transform:scale(1);   box-shadow: 0 0 6px #fff, 0 0 14px #f59e0b; }
+      50%      { opacity:.4; transform:scale(1.6); box-shadow: 0 0 10px #fff, 0 0 22px #ec4899; }
+    }
+    .ticker-track-wrap {
+      flex: 1; overflow: hidden; height: 100%;
+      display: flex; align-items: center;
+      position: relative; z-index: 2;
+      mask-image: linear-gradient(90deg, transparent 0%, black 3%, black 97%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 3%, black 97%, transparent 100%);
+    }
+    .ticker-track {
+      display: flex; gap: 0;
+      animation: tickerScroll 30s linear infinite;
+      white-space: nowrap; will-change: transform;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes tickerScroll {
+      0%   { transform: translateX(0) }
+      100% { transform: translateX(-50%) }
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 0 44px;
+      color: rgba(255,255,255,0.95);
+      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.03em;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .ticker-item strong {
+      font-weight: 800;
+      background: linear-gradient(90deg, #fff176, #fbbf24, #ffffff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 5px rgba(251,191,36,0.7));
+    }
+    .ticker-dot {
+      display: inline-block; width: 5px; height: 5px;
+      background: linear-gradient(135deg, #ec4899, #f59e0b);
+      border-radius: 50%; flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(236,72,153,0.8);
+    }
+    .ticker-dismiss {
+      flex-shrink: 0; width: 38px; height: 38px; position: relative; z-index: 2;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(6px);
+      border: none; border-left: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+      font-size: 0.75rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .ticker-dismiss:hover { background: rgba(255,255,255,0.28); color: #fff; }
+    .ticker-bar.hidden { display: none; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 38px; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 70px;
+      background: rgba(247,248,255,0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--mist);
+      transition: box-shadow 0.3s, top 0.3s;
+    }
+    nav.scrolled { box-shadow: 0 4px 24px var(--shadow); }
+    nav.ticker-hidden { top: 0; }
+    .ticker-bar.hidden { display: none; }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--ink);
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #5b5ef4, #7c3aed);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+    .logo-text span { color: var(--rust); }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--slate);
+      font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--rust); }
+
+    .nav-cta {
+      background: var(--rust); color: var(--white);
+      border: none; padding: 10px 22px; border-radius: 6px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--rust-hover); transform: translateY(-1px); }
+
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--ink); border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 136px 5% 60px;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(91,94,244,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 10% 80%, rgba(236,72,153,0.07) 0%, transparent 60%),
+        var(--cream);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg-text {
+      position: absolute; right: -2%; top: 15%;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(120px, 18vw, 220px);
+      font-weight: 900; color: rgba(91,94,244,0.05);
+      white-space: nowrap; user-select: none; line-height: 1;
+    }
+    .hero-content { max-width: 580px; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(91,94,244,0.1); color: var(--rust);
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--rust); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      line-height: 1.12; font-weight: 900;
+      margin-bottom: 20px; color: var(--ink);
+    }
+    h1 em { font-style: italic; color: var(--rust); }
+
+    .hero-sub {
+      font-size: 1.05rem; line-height: 1.7; color: var(--slate);
+      margin-bottom: 36px; max-width: 480px; font-weight: 300;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--rust); color: var(--white);
+      border: none; padding: 14px 28px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: var(--rust-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(91,94,244,0.35); }
+    .btn-ghost {
+      background: transparent; color: var(--ink);
+      border: 1.5px solid var(--mist); padding: 14px 28px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--rust); color: var(--rust); }
+
+    .hero-stats {
+      display: flex; gap: 40px; margin-top: 48px; padding-top: 40px;
+      border-top: 1px solid var(--mist);
+    }
+    .stat-item { }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--slate); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .hero-visual {
+      position: absolute; right: 5%; top: 50%; transform: translateY(-50%);
+      width: min(420px, 42%);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+    .book-card {
+      background: var(--white); border-radius: 12px;
+      padding: 20px; box-shadow: 0 4px 20px var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: floatUp 6s ease-in-out infinite;
+    }
+    .book-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px var(--shadow); }
+    .book-card:nth-child(2) { animation-delay: -2s; margin-top: 24px; }
+    .book-card:nth-child(3) { animation-delay: -4s; }
+    .book-card:nth-child(4) { animation-delay: -1s; margin-top: 24px; }
+    @keyframes floatUp { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .bc-spine { height: 80px; border-radius: 6px; margin-bottom: 12px; }
+    .bc-title { font-weight: 600; font-size: 0.78rem; margin-bottom: 4px; }
+    .bc-author { font-size: 0.7rem; color: var(--slate); }
+
+    /* ── SEARCH ── */
+    #search-section {
+      padding: 60px 5%;
+      background: linear-gradient(135deg, #0d0f1a 0%, #1a1040 100%);
+      position: relative; overflow: hidden;
+    }
+    #search-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235b5ef4' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .search-inner { max-width: 700px; margin: 0 auto; text-align: center; position: relative; }
+    .search-label {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      color: var(--white); margin-bottom: 8px;
+    }
+    .search-sub { color: rgba(255,255,255,0.55); font-size: 0.9rem; margin-bottom: 28px; }
+    .search-box {
+      display: flex; gap: 0;
+      background: var(--white); border-radius: 10px;
+      overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .search-input {
+      flex: 1; border: none; outline: none;
+      padding: 16px 20px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; background: transparent; color: var(--ink);
+    }
+    .search-select {
+      border: none; outline: none; border-left: 1px solid var(--mist);
+      padding: 16px 14px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; background: var(--parchment); color: var(--slate);
+      cursor: pointer;
+    }
+    .search-btn {
+      background: var(--rust); color: var(--white);
+      border: none; padding: 16px 28px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .search-btn:hover { background: var(--rust-hover); }
+    #search-results {
+      margin-top: 20px; display: none;
+      background: var(--white); border-radius: 10px;
+      overflow: hidden; text-align: left;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .result-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; border-bottom: 1px solid var(--mist);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item:hover { background: var(--parchment); }
+    .result-color { width: 40px; height: 50px; border-radius: 4px; flex-shrink: 0; }
+    .result-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .result-meta { font-size: 0.78rem; color: var(--slate); }
+    .result-badge {
+      margin-left: auto; font-size: 0.7rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 12px; white-space: nowrap;
+    }
+    .badge-available { background: rgba(90,122,92,0.15); color: var(--sage); }
+    .badge-borrowed { background: rgba(192,82,42,0.12); color: var(--rust); }
+
+    /* ── SERVICES ── */
+    #services { padding: 90px 5%; background: var(--cream); }
+    .section-tag {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--rust);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; line-height: 1.2; margin-bottom: 16px;
+    }
+    .section-desc { font-size: 1rem; color: var(--slate); line-height: 1.7; max-width: 500px; font-weight: 300; }
+
+    .services-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px; margin-top: 50px;
+    }
+    .service-card {
+      background: var(--white); border-radius: 16px;
+      padding: 32px 28px;
+      border: 1px solid var(--mist);
+      transition: all 0.3s; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .service-card::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--rust), var(--accent2)); transform: scaleX(0);
+      transform-origin: left; transition: transform 0.3s;
+    }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px var(--shadow); }
+    .service-card:hover::after { transform: scaleX(1); }
+    .service-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+    }
+    .service-title { font-weight: 600; font-size: 1.05rem; margin-bottom: 10px; }
+    .service-desc { font-size: 0.88rem; color: var(--slate); line-height: 1.6; font-weight: 300; }
+    .service-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 16px; font-size: 0.82rem; font-weight: 600;
+      color: var(--rust); text-decoration: none;
+    }
+    .service-link:hover { gap: 10px; }
+
+    /* ── BOOKS CATALOG ── */
+    #catalog { padding: 90px 5%; background: #f0f2ff; }
+    .catalog-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: gap; }
+    .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .filter-tab {
+      padding: 7px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 500;
+      border: 1.5px solid var(--mist); background: transparent; color: var(--slate);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .filter-tab.active, .filter-tab:hover {
+      background: var(--rust); color: var(--white); border-color: var(--rust);
+    }
+    .books-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+    }
+    .book-item {
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .book-item:hover { transform: translateY(-4px); }
+    .book-cover {
+      width: 100%; aspect-ratio: 3/4;
+      border-radius: 10px; margin-bottom: 12px;
+      display: flex; align-items: flex-end; padding: 16px;
+      position: relative; overflow: hidden;
+      box-shadow: 4px 6px 16px var(--shadow);
+    }
+    .book-cover::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
+    }
+    .book-cover-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.82rem; color: white; font-weight: 700;
+      line-height: 1.2; position: relative; z-index: 1;
+    }
+    .book-info-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
+    .book-info-author { font-size: 0.77rem; color: var(--slate); margin-bottom: 8px; }
+    .book-avail { font-size: 0.72rem; font-weight: 600; }
+    .avail-yes { color: var(--sage); }
+    .avail-no { color: var(--rust); }
+
+    /* ── BOOKING ── */
+    #booking { padding: 90px 5%; background: var(--cream); }
+    .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+    .booking-form {
+      background: var(--white); border-radius: 20px;
+      padding: 40px; box-shadow: 0 8px 32px var(--shadow);
+    }
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; margin-bottom: 8px;
+    }
+    .form-sub { font-size: 0.85rem; color: var(--slate); margin-bottom: 28px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.8rem; font-weight: 600; color: var(--slate); }
+    input, select, textarea {
+      border: 1.5px solid var(--mist); border-radius: 8px;
+      padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+      color: var(--ink); background: var(--parchment); outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--rust); background: var(--white); }
+    textarea { resize: vertical; min-height: 90px; }
+    .submit-btn {
+      width: 100%; background: var(--rust); color: var(--white);
+      border: none; padding: 14px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; margin-top: 20px; transition: all 0.2s;
+    }
+    .submit-btn:hover { background: var(--rust-hover); transform: translateY(-1px); }
+    .form-success {
+      display: none; text-align: center; padding: 24px;
+      background: rgba(16,185,129,0.1); border-radius: 10px; margin-top: 16px;
+    }
+    .form-success span { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .form-success p { color: #10b981; font-weight: 600; }
+
+    .booking-info h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; margin-bottom: 14px;
+    }
+    .booking-info p { color: var(--slate); line-height: 1.7; margin-bottom: 30px; font-weight: 300; }
+    .hours-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .hours-table td { padding: 10px 0; border-bottom: 1px solid var(--mist); font-size: 0.88rem; }
+    .hours-table td:last-child { text-align: right; color: var(--slate); }
+    .hours-table tr:last-child td { border-bottom: none; }
+    .contact-items { display: flex; flex-direction: column; gap: 12px; }
+    .contact-item { display: flex; align-items: center; gap: 12px; font-size: 0.88rem; }
+    .ci-icon { width: 36px; height: 36px; background: var(--parchment); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
+    /* ── TESTIMONIALS ── */
+    #testimonials { padding: 90px 5%; background: linear-gradient(135deg, #0d0f1a 0%, #0f172a 100%); overflow: hidden; }
+    #testimonials h2 { color: var(--white); }
+    #testimonials .section-tag { color: var(--gold); }
+    .testimonials-track {
+      display: flex; gap: 24px;
+      margin-top: 44px;
+      animation: scroll 28s linear infinite;
+      width: max-content;
+    }
+    .testimonials-track:hover { animation-play-state: paused; }
+    @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .testi-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(91,94,244,0.2);
+      border-radius: 16px; padding: 28px; width: 320px; flex-shrink: 0;
+    }
+    .stars { color: #f59e0b; font-size: 0.9rem; margin-bottom: 14px; letter-spacing: 2px; }
+    .testi-text { color: rgba(255,255,255,0.75); font-size: 0.88rem; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: white;
+    }
+    .author-name { font-weight: 600; color: var(--white); font-size: 0.88rem; }
+    .author-role { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #080a14; color: rgba(255,255,255,0.6);
+      padding: 60px 5% 30px;
+    }
+    .footer-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand .logo-text { color: var(--white); }
+    .footer-brand p { font-size: 0.85rem; line-height: 1.7; margin-top: 14px; }
+    .footer-col h4 { color: var(--white); font-size: 0.88rem; font-weight: 600; margin-bottom: 16px; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.83rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08); padding-top: 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.8rem; flex-wrap: wrap; gap: 10px;
+    }
+    .footer-bottom a { color: var(--gold); text-decoration: none; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(26,20,16,0.75); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px;
+      padding: 40px; max-width: 480px; width: 100%;
+      position: relative; animation: modalIn 0.3s ease;
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--mist); border: none; cursor: pointer;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-book-cover { height: 140px; border-radius: 10px; margin-bottom: 20px; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 4px; }
+    .modal-meta { color: var(--slate); font-size: 0.88rem; margin-bottom: 16px; }
+    .modal-desc { font-size: 0.88rem; color: var(--slate); line-height: 1.7; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 12px; }
+    .modal-borrow { flex: 1; background: var(--rust); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
+    .modal-reserve { flex: 1; background: transparent; color: var(--ink); border: 1.5px solid var(--mist); padding: 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 300;
+      background: var(--ink); color: var(--white);
+      padding: 14px 20px; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      display: none; position: fixed; inset: 0; z-index: 99;
+      background: #f7f8ff; padding: 90px 5% 40px;
+      flex-direction: column; gap: 32px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-size: 1.2rem; font-weight: 500; color: var(--ink); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero-visual { display: none; }
+      .booking-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .hero-stats { gap: 24px; }
+      .books-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .hero-actions { flex-direction: column; }
+      .btn-primary, .btn-ghost { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT TICKER -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-label"><span class="lbl-dot"></span>🏷️ Offer</div>
+  <div class="ticker-track-wrap">
+    <div class="ticker-track">
+      <!-- First copy -->
+      <span class="ticker-item">📚 Buy any book today and get <strong>5% OFF</strong> instantly! Limited time offer — visit us now.</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">🎉 Special discount for members — <strong>5% off</strong> on every book purchase today only!</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">🛒 Today's Deal: Purchase any book from our collection &amp; enjoy <strong>5% savings</strong> at checkout.</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">📖 Don't miss out! Buy a book today and save <strong>5%</strong> — offer valid while stocks last.</span>
+      <span class="ticker-dot"></span>
+      <!-- Duplicate for seamless loop -->
+      <span class="ticker-item">📚 Buy any book today and get <strong>5% OFF</strong> instantly! Limited time offer — visit us now.</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">🎉 Special discount for members — <strong>5% off</strong> on every book purchase today only!</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">🛒 Today's Deal: Purchase any book from our collection &amp; enjoy <strong>5% savings</strong> at checkout.</span>
+      <span class="ticker-dot"></span>
+      <span class="ticker-item">📖 Don't miss out! Buy a book today and save <strong>5%</strong> — offer valid while stocks last.</span>
+      <span class="ticker-dot"></span>
+    </div>
+  </div>
+  <button class="ticker-dismiss" id="tickerDismiss" title="Dismiss">✕</button>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">Libra<span>Nest</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#catalog">Catalog</a></li>
+    <li><a href="#booking">Book a Seat</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <button class="nav-cta" onclick="scrollTo('#booking')">Join Library</button>
+  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMobileMenu()">Services</a>
+  <a href="#catalog" onclick="closeMobileMenu()">Book Catalog</a>
+  <a href="#booking" onclick="closeMobileMenu()">Book a Seat</a>
+  <a href="#testimonials" onclick="closeMobileMenu()">Reviews</a>
+  <a href="#booking" onclick="closeMobileMenu()" style="color:var(--rust);font-weight:700">Join Library →</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-text">LIBRARY</div>
+  <div class="hero-content">
+    <div class="hero-badge">Now Open · 7 Days a Week</div>
+    <h1>Your Gateway to <em>Knowledge</em> & Ideas</h1>
+    <p class="hero-sub">Browse thousands of books, use our stationery, photocopy machine, and computers. Everything you need to learn, create, and grow — all in one place.</p>
+    <div class="hero-actions">
+      <a href="#catalog" class="btn-primary">Browse Catalog</a>
+      <a href="#booking" class="btn-ghost">Book a Seat</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">5,000+</div>
+        <div class="stat-label">Books Available</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Computer Stations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Members</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="book-card">
+      <div class="bc-spine" style="background:linear-gradient(135deg,#5b5ef4,#818cf8)"></div>
+      <div class="bc-title">World History</div>
+      <div class="bc-author">John Adams</div>
+    </div>
+    <div class="book-card">
+      <div class="bc-spine" style="background:linear-gradient(135deg,#10b981,#34d399)"></div>
+      <div class="bc-title">Science & Nature</div>
+      <div class="bc-author">Emily Clarke</div>
+    </div>
+    <div class="book-card">
+      <div class="bc-spine" style="background:linear-gradient(135deg,#ec4899,#f472b6)"></div>
+      <div class="bc-title">Mathematics</div>
+      <div class="bc-author">Dr. Rahman</div>
+    </div>
+    <div class="book-card">
+      <div class="bc-spine" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"></div>
+      <div class="bc-title">Classic Literature</div>
+      <div class="bc-author">Jane Austen</div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section id="search-section">
+  <div class="search-inner">
+    <h2 class="search-label">Find Your Next Book</h2>
+    <p class="search-sub">Search across our entire collection of 5,000+ titles</p>
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="Title, author, or keyword..." />
+      <select class="search-select" id="searchCategory">
+        <option value="all">All Types</option>
+        <option value="books">Books</option>
+        <option value="stationery">Stationery</option>
+        <option value="computers">Computers</option>
+      </select>
+      <button class="search-btn" onclick="performSearch()">Search</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-tag">What We Offer</div>
+  <h2>Everything You Need Under<br>One Roof</h2>
+  <p class="section-desc">Our library is more than books — it's a complete learning and productivity hub for the whole community.</p>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon" style="background:rgba(91,94,244,0.12)">📚</div>
+      <div class="service-title">Book Collection</div>
+      <p class="service-desc">Over 5,000 carefully curated books across fiction, science, history, technology, Islamic studies, Bengali literature, and more. New arrivals every month.</p>
+      <a href="#catalog" class="service-link">Browse Catalog →</a>
+    </div>
+    <div class="service-card">
+      <div class="service-icon" style="background:rgba(16,185,129,0.12)">✏️</div>
+      <div class="service-title">Stationery & Supplies</div>
+      <p class="service-desc">Pens, pencils, notebooks, highlighters, rulers, and study materials available for purchase or borrowing. Everything for students and professionals.</p>
+      <a href="#booking" class="service-link">Learn More →</a>
+    </div>
+    <div class="service-card">
+      <div class="service-icon" style="background:rgba(124,58,237,0.12)">🖨️</div>
+      <div class="service-title">Photocopy Machine</div>
+      <p class="service-desc">High-speed photocopying, printing, and scanning services at affordable rates. Perfect for academic papers, documents, and study materials.</p>
+      <a href="#booking" class="service-link">Book Time →</a>
+    </div>
+    <div class="service-card">
+      <div class="service-icon" style="background:rgba(245,158,11,0.12)">💻</div>
+      <div class="service-title">Computer Stations</div>
+      <p class="service-desc">12 modern computer workstations with high-speed internet for research, online work, job applications, e-learning, and more. Pre-booking available.</p>
+      <a href="#booking" class="service-link">Reserve a PC →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<section id="catalog">
+  <div class="catalog-header">
+    <div>
+      <div class="section-tag">Library Catalog</div>
+      <h2>Featured Books</h2>
+    </div>
+    <div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterBooks('all', this)">All Books</button>
+        <button class="filter-tab" onclick="filterBooks('fiction', this)">Fiction</button>
+        <button class="filter-tab" onclick="filterBooks('science', this)">Science</button>
+        <button class="filter-tab" onclick="filterBooks('history', this)">History</button>
+        <button class="filter-tab" onclick="filterBooks('bangla', this)">বাংলা</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="books-grid" id="booksGrid"></div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="booking-grid">
+    <div class="booking-info">
+      <div class="section-tag">Visit Us</div>
+      <h3>Reserve a Space or<br>Join the Library</h3>
+      <p>Book a computer station, request a book, or register as a member. Fill out the form and we'll confirm within 24 hours.</p>
+
+      <table class="hours-table">
+        <tr><td><strong>Saturday – Thursday</strong></td><td>8:00 AM – 9:00 PM</td></tr>
+        <tr><td><strong>Friday</strong></td><td>2:00 PM – 9:00 PM</td></tr>
+        <tr><td><strong>Public Holidays</strong></td><td>10:00 AM – 6:00 PM</td></tr>
+      </table>
+
+      <div class="contact-items">
+        <div class="contact-item">
+          <div class="ci-icon">📍</div>
+          <span>Main Road, Laksham, Cumilla, Bangladesh</span>
+        </div>
+        <div class="contact-item">
+          <div class="ci-icon">📞</div>
+          <span>+880 1700-000000</span>
+        </div>
+        <div class="contact-item">
+          <div class="ci-icon">📧</div>
+          <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="93fafdf5fcd3fffaf1e1f2fdf6e0e7bdf0fcfebdf1f7">[email&#160;protected]</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-form">
+      <div class="form-title">Make a Request</div>
+      <p class="form-sub">Fill in your details and we'll take care of the rest.</p>
+      <form id="bookingForm" onsubmit="handleBooking(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" placeholder="Rahman" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" placeholder="Hossain" required />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" placeholder="01700-000000" required />
+          </div>
+          <div class="form-group">
+            <label>Email (optional)</label>
+            <input type="email" placeholder="you@email.com" />
+          </div>
+          <div class="form-group full">
+            <label>Service Required</label>
+            <select required>
+              <option value="">Select a service</option>
+              <option>Borrow a Book</option>
+              <option>Reserve a Computer Station</option>
+              <option>Photocopy / Printing</option>
+              <option>Purchase Stationery</option>
+              <option>Library Membership</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Preferred Date & Time</label>
+            <input type="datetime-local" required />
+          </div>
+          <div class="form-group full">
+            <label>Additional Notes</label>
+            <textarea placeholder="Any specific book title, topic, or requirement..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">Submit Request</button>
+      </form>
+      <div class="form-success" id="formSuccess">
+        <span>✅</span>
+        <p>Request submitted! We'll contact you shortly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-tag">Member Reviews</div>
+  <h2>What Our Members Say</h2>
+  <div style="overflow:hidden">
+    <div class="testimonials-track" id="testiTrack"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="margin-bottom:12px">
+        <div class="logo-icon">📚</div>
+        <div class="logo-text">Libra<span style="color:#818cf8">Nest</span></div>
+      </div>
+      <p>Your community library — a home for books, learning, and connection. Serving Laksham since 2010.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul class="footer-links">
+        <li><a href="#catalog">Book Catalog</a></li>
+        <li><a href="#services">Stationery</a></li>
+        <li><a href="#services">Photocopy</a></li>
+        <li><a href="#services">Computer Lab</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Library</h4>
+      <ul class="footer-links">
+        <li><a href="#booking">Membership</a></li>
+        <li><a href="#booking">Reservations</a></li>
+        <li><a href="#booking">Opening Hours</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul class="footer-links">
+        <li><a href="#">Laksham, Cumilla</a></li>
+        <li><a href="tel:+8801700000000">+880 1700-000000</a></li>
+        <li><a href="/cdn-cgi/l/email-protection#335a5d555c735f5a5141525d5640471d505c5e1d5157"><span class="__cf_email__" data-cfemail="afc6c1c9c0efc3c6cdddcec1cadcdb81ccc0c281cdcb">[email&#160;protected]</span></a></li>
+        <li><a href="#">Facebook Page</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 LibraNest. All rights reserved.</span>
+    <span>Built with ❤️ for the community · <a href="#">Privacy Policy</a></span>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-book-cover" id="modalCover"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-actions">
+      <button class="modal-borrow" onclick="borrowBook()">📖 Borrow Book</button>
+      <button class="modal-reserve" onclick="reserveBook()">🔖 Reserve</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ <span id="toastMsg"></span></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── DATA ──
+  const books = [
+    { id:1, title:"Lalsalu", author:"Syed Waliullah", category:"bangla", color:"#5b5ef4", available:true, desc:"A masterpiece of Bengali literature depicting village life and religious hypocrisy." },
+    { id:2, title:"Padma Nadir Majhi", author:"Manik Bandopadhyay", category:"bangla", color:"#10b981", available:true, desc:"Classic Bengali fiction about the lives of fishermen on the Padma river." },
+    { id:3, title:"A Brief History of Time", author:"Stephen Hawking", category:"science", color:"#7c3aed", available:true, desc:"A landmark volume in science writing that explains complex cosmology to general audiences." },
+    { id:4, title:"Sapiens", author:"Yuval Noah Harari", category:"history", color:"#f59e0b", available:false, desc:"A brief history of humankind from the Stone Age to the present." },
+    { id:5, title:"The Alchemist", author:"Paulo Coelho", category:"fiction", color:"#ec4899", available:true, desc:"A magical story about following your dreams and listening to your heart." },
+    { id:6, title:"Feynman Lectures", author:"Richard Feynman", category:"science", color:"#0ea5e9", available:true, desc:"The definitive physics textbook based on Feynman's famous Caltech lectures." },
+    { id:7, title:"1984", author:"George Orwell", category:"fiction", color:"#1e293b", available:false, desc:"A chilling dystopian novel about surveillance, totalitarianism and thought control." },
+    { id:8, title:"Bibek-Ananda", author:"Rabindranath Tagore", category:"bangla", color:"#d97706", available:true, desc:"One of Tagore's finest prose works exploring themes of duty and joy." },
+    { id:9, title:"Guns, Germs & Steel", author:"Jared Diamond", category:"history", color:"#059669", available:true, desc:"Why certain civilizations came to dominate others — a sweeping account." },
+    { id:10, title:"Brave New World", author:"Aldous Huxley", category:"fiction", color:"#7c3aed", available:true, desc:"A prophetic novel of a pleasure-seeking society ruled by technology." },
+    { id:11, title:"The Origin of Species", author:"Charles Darwin", category:"science", color:"#065f46", available:false, desc:"Darwin's groundbreaking work on evolution through natural selection." },
+    { id:12, title:"Muktijoddhar Golpo", author:"Humayun Ahmed", category:"bangla", color:"#dc2626", available:true, desc:"Short stories inspired by the Liberation War of 1971 by Bangladesh's most beloved author." },
+  ];
+
+  const testimonials = [
+    { text:"The computer stations are super fast and the staff is always helpful. I come here every week for my online work.", author:"Farhan Islam", role:"Student, Laksham College", color:"#5b5ef4" },
+    { text:"Best library in the area! The collection of Bangla books is amazing. Found rare titles I couldn't find elsewhere.", author:"Nasrin Begum", role:"Teacher", color:"#10b981" },
+    { text:"The photocopy machine saves me so much time. Affordable rates and always in working condition.", author:"Karim Uddin", role:"Business Owner", color:"#7c3aed" },
+    { text:"My kids love coming here. The stationery section has everything they need for school. Highly recommend!", author:"Rohima Khatun", role:"Parent", color:"#f59e0b" },
+    { text:"Got my membership two years ago and never regretted it. The reading environment is so peaceful and focused.", author:"Sabbir Ahmed", role:"HSC Student", color:"#ec4899" },
+    { text:"The librarians always help me find the right books for my research. A true community treasure.", author:"Dr. Taslima", role:"Researcher", color:"#0ea5e9" },
+  ];
+
+  const searchData = [
+    ...books.map(b => ({ ...b, type:"book" })),
+    { title:"Notebook (A4)", type:"stationery", color:"#f59e0b", available:true, desc:"Premium quality A4 notebook" },
+    { title:"Ballpoint Pens (Set of 10)", type:"stationery", color:"#10b981", available:true, desc:"Blue and black ink pens" },
+    { title:"Computer Station 1", type:"computers", color:"#7c3aed", available:true, desc:"Core i5, 8GB RAM, high-speed internet" },
+    { title:"Photocopy Service", type:"photocopy", color:"#5b5ef4", available:true, desc:"B&W and colour photocopies available" },
+  ];
+
+  // ── RENDER BOOKS ──
+  function renderBooks(filter = 'all') {
+    const grid = document.getElementById('booksGrid');
+    const filtered = filter === 'all' ? books : books.filter(b => b.category === filter);
+    grid.innerHTML = filtered.map(b => `
+      <div class="book-item" onclick="openModal(${b.id})">
+        <div class="book-cover" style="background:linear-gradient(135deg, ${b.color}, ${b.color}88)">
+          <div class="book-cover-title">${b.title}</div>
+        </div>
+        <div class="book-info-title">${b.title}</div>
+        <div class="book-info-author">${b.author}</div>
+        <div class="book-avail ${b.available ? 'avail-yes' : 'avail-no'}">
+          ${b.available ? '✓ Available' : '✗ Borrowed'}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterBooks(cat, el) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderBooks(cat);
+  }
+
+  // ── RENDER TESTIMONIALS ──
+  function renderTestimonials() {
+    const doubled = [...testimonials, ...testimonials];
+    document.getElementById('testiTrack').innerHTML = doubled.map(t => `
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"${t.text}"</p>
+        <div class="testi-author">
+          <div class="author-avatar" style="background:${t.color}">${t.author.charAt(0)}</div>
+          <div>
+            <div class="author-name">${t.author}</div>
+            <div class="author-role">${t.role}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── SEARCH ──
+  function performSearch() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const cat = document.getElementById('searchCategory').value;
+    const box = document.getElementById('search-results');
+    if (!q) return;
+    let results = searchData.filter(item => {
+      const matchQ = item.title.toLowerCase().includes(q) || (item.author || '').toLowerCase().includes(q) || (item.desc || '').toLowerCase().includes(q);
+      const matchCat = cat === 'all' || item.type === cat || item.category === cat;
+      return matchQ && matchCat;
+    }).slice(0, 5);
+    if (!results.length) {
+      box.style.display = 'block';
+      box.innerHTML = `<div class="result-item"><div style="padding:4px;color:var(--slate);font-size:.88rem">No results found for "<strong>${q}</strong>"</div></div>`;
+      return;
+    }
+    box.style.display = 'block';
+    box.innerHTML = results.map(r => `
+      <div class="result-item" onclick="showToast('Opening: ${r.title}')">
+        <div class="result-color" style="background:${r.color || '#aaa'}"></div>
+        <div>
+          <div class="result-title">${r.title}</div>
+          <div class="result-meta">${r.author || r.type} · ${r.desc?.slice(0,50)}...</div>
+        </div>
+        <span class="result-badge ${r.available ? 'badge-available' : 'badge-borrowed'}">${r.available ? 'Available' : 'Borrowed'}</span>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key === 'Enter') performSearch(); });
+
+  // ── MODAL ──
+  let currentBook = null;
+  function openModal(id) {
+    const b = books.find(x => x.id === id);
+    if (!b) return;
+    currentBook = b;
+    document.getElementById('modalCover').style.cssText = `background:linear-gradient(135deg, ${b.color}, ${b.color}88)`;
+    document.getElementById('modalTitle').textContent = b.title;
+    document.getElementById('modalMeta').textContent = `${b.author} · ${b.category.charAt(0).toUpperCase()+b.category.slice(1)} · ${b.available ? '✓ Available Now' : '✗ Currently Borrowed'}`;
+    document.getElementById('modalDesc').textContent = b.desc;
+    document.getElementById('bookModal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('bookModal').classList.remove('open'); }
+  document.getElementById('bookModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeModal(); });
+
+  function borrowBook() {
+    closeModal();
+    showToast(`"${currentBook.title}" borrow request sent!`);
+  }
+  function reserveBook() {
+    closeModal();
+    showToast(`"${currentBook.title}" has been reserved for you!`);
+  }
+
+  // ── FORM ──
+  function handleBooking(e) {
+    e.preventDefault();
+    document.getElementById('bookingForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+    showToast('Request submitted successfully!');
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── NAVBAR ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    // Close search results on scroll
+    document.getElementById('search-results').style.display = 'none';
+  });
+
+  // ── HAMBURGER ──
+  document.getElementById('hamburgerBtn').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+  function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  // ── SMOOTH SCROLL ──
+  function scrollTo(sel) { document.querySelector(sel)?.scrollIntoView({ behavior:'smooth' }});
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth' }); closeMobileMenu(); }
+    });
+  });
+
+  // ── TICKER DISMISS ──
+  document.getElementById('tickerDismiss').addEventListener('click', () => {
+    document.getElementById('tickerBar').classList.add('hidden');
+    document.getElementById('navbar').classList.add('ticker-hidden');
+    document.getElementById('hero').style.paddingTop = '100px';
+  });
+
+  // ── INIT ──
+  renderBooks();
+  renderTestimonials();
+</script>
+</body>
+</html>
